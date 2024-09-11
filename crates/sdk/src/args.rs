@@ -22,7 +22,7 @@ use namada_ibc::IbcShieldingData;
 use namada_token::masp::utils::RetryStrategy;
 use namada_tx::data::GasLimit;
 use namada_tx::Memo;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use zeroize::Zeroizing;
 
 use crate::eth_bridge::bridge_pool;
@@ -468,6 +468,97 @@ impl TxUnshieldingTransfer {
         context: &impl Namada,
     ) -> crate::error::Result<(namada_tx::Tx, SigningTxData)> {
         tx::build_unshielding_transfer(context, self).await
+    }
+}
+
+/// An token swap on Osmosis
+#[derive(Debug, Clone)]
+pub struct TxOsmosisSwap<C: NamadaTypes = SdkTypes> {
+    /// The IBC transfer data
+    pub transfer: TxIbcTransfer<C>,
+    /// The token we wish to receive
+    pub output_denom: String,
+    /// Recipient payment address
+    pub recipient: C::PaymentAddress,
+    /// Slippage percent
+    pub slippage_percent: u64,
+    /// TODO! Figure out what this is
+    pub window_seconds: u64,
+}
+
+impl TxOsmosisSwap<SdkTypes> {
+    /// Create an IBC transfer from the input arguments
+    pub fn assemble(self) -> TxIbcTransfer<SdkTypes> {
+        #[derive(Serialize)]
+        struct Memo {
+            wasm: Wasm,
+        }
+
+        #[derive(Serialize)]
+        struct Wasm {
+            contract: String,
+            msg: OsmosisSwap,
+        }
+
+        #[derive(Serialize)]
+        struct OsmosisSwap {
+            output_denom: String,
+            slippage: Slippage,
+            receiver: String,
+            next_memo: Option<String>,
+            on_failed_delivery: String,
+        }
+
+        #[derive(Serialize)]
+        struct Slippage {
+            twap: Twap,
+        }
+
+        #[derive(Serialize)]
+        struct Twap {
+            #[serde(serialize_with = "serialize_slippage")]
+            slippage_percent: u64,
+            window_seconds: u64,
+        }
+        fn serialize_slippage<S>(
+            val: &u64,
+            serializer: S,
+        ) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_str(&val.to_string())
+        }
+        let Self {
+            mut transfer,
+            output_denom,
+            recipient,
+            slippage_percent,
+            window_seconds,
+        } = self;
+        let next_memo = transfer.ibc_memo
+            .take()
+            .expect("No masp transaction provided as a memo.");
+        let memo = Memo {
+            wasm: Wasm {
+                contract: transfer.receiver.clone(),
+                msg: OsmosisSwap {
+                    output_denom: output_denom.to_string(),
+                    slippage: Slippage {
+                        twap: Twap {
+                            slippage_percent,
+                            window_seconds,
+                        },
+                    },
+                    next_memo: Some(next_memo),
+                    receiver: recipient.to_string(),
+                    on_failed_delivery: "do_nothing".to_string(),
+                },
+            },
+        };
+        transfer.ibc_memo = Some(serde_json::to_string(&memo).unwrap());
+        dbg!(&transfer.ibc_memo);
+        transfer
     }
 }
 

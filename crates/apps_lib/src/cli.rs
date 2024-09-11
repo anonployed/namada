@@ -63,6 +63,7 @@ pub mod cmds {
         TxShieldingTransfer(TxShieldingTransfer),
         TxUnshieldingTransfer(TxUnshieldingTransfer),
         TxIbcTransfer(TxIbcTransfer),
+        TxOsmosisSwap(TxOsmosisSwap),
         TxUpdateAccount(TxUpdateAccount),
         TxInitProposal(TxInitProposal),
         TxVoteProposal(TxVoteProposal),
@@ -86,6 +87,7 @@ pub mod cmds {
                 .subcommand(TxShieldingTransfer::def().display_order(2))
                 .subcommand(TxUnshieldingTransfer::def().display_order(2))
                 .subcommand(TxIbcTransfer::def().display_order(2))
+                .subcommand(TxOsmosisSwap::def().display_order(2))
                 .subcommand(TxUpdateAccount::def().display_order(2))
                 .subcommand(TxInitProposal::def().display_order(2))
                 .subcommand(TxVoteProposal::def().display_order(2))
@@ -112,6 +114,8 @@ pub mod cmds {
                 SubCmd::parse(matches).map(Self::TxUnshieldingTransfer);
             let tx_ibc_transfer =
                 SubCmd::parse(matches).map(Self::TxIbcTransfer);
+            let tx_osmosis_swap =
+                SubCmd::parse(matches).map(Self::TxOsmosisSwap);
             let tx_update_account =
                 SubCmd::parse(matches).map(Self::TxUpdateAccount);
             let tx_init_proposal =
@@ -131,6 +135,7 @@ pub mod cmds {
                 .or(tx_shielding_transfer)
                 .or(tx_unshielding_transfer)
                 .or(tx_ibc_transfer)
+                .or(tx_osmosis_swap)
                 .or(tx_update_account)
                 .or(tx_init_proposal)
                 .or(tx_vote_proposal)
@@ -246,6 +251,7 @@ pub mod cmds {
                 .subcommand(TxShieldingTransfer::def().display_order(1))
                 .subcommand(TxUnshieldingTransfer::def().display_order(1))
                 .subcommand(TxIbcTransfer::def().display_order(1))
+                .subcommand(TxOsmosisSwap::def().display_order(1))
                 .subcommand(TxUpdateAccount::def().display_order(1))
                 .subcommand(TxInitAccount::def().display_order(1))
                 .subcommand(TxRevealPk::def().display_order(1))
@@ -318,6 +324,7 @@ pub mod cmds {
             let tx_unshielding_transfer =
                 Self::parse_with_ctx(matches, TxUnshieldingTransfer);
             let tx_ibc_transfer = Self::parse_with_ctx(matches, TxIbcTransfer);
+            let tx_osmosis_swap = Self::parse_with_ctx(matches, TxOsmosisSwap);
             let tx_update_account =
                 Self::parse_with_ctx(matches, TxUpdateAccount);
             let tx_init_account = Self::parse_with_ctx(matches, TxInitAccount);
@@ -403,6 +410,7 @@ pub mod cmds {
                 .or(tx_shielding_transfer)
                 .or(tx_unshielding_transfer)
                 .or(tx_ibc_transfer)
+                .or(tx_osmosis_swap)
                 .or(tx_update_account)
                 .or(tx_init_account)
                 .or(tx_reveal_pk)
@@ -496,6 +504,7 @@ pub mod cmds {
         TxShieldingTransfer(TxShieldingTransfer),
         TxUnshieldingTransfer(TxUnshieldingTransfer),
         TxIbcTransfer(TxIbcTransfer),
+        TxOsmosisSwap(TxOsmosisSwap),
         QueryResult(QueryResult),
         TxUpdateAccount(TxUpdateAccount),
         TxInitAccount(TxInitAccount),
@@ -1429,6 +1438,25 @@ pub mod cmds {
             App::new(Self::CMD)
                 .about(wrap!("Send a signed IBC transfer transaction."))
                 .add_args::<args::TxIbcTransfer<args::CliTypes>>()
+        }
+    }
+
+    #[derive(Clone, Debug)]
+    pub struct TxOsmosisSwap(pub args::TxOsmosisSwap<args::CliTypes>);
+
+    impl SubCmd for TxOsmosisSwap {
+        const CMD: &'static str = "osmosis-swap";
+
+        fn parse(matches: &ArgMatches) -> Option<Self> {
+            matches.subcommand_matches(Self::CMD).map(|matches| {
+                TxOsmosisSwap(args::TxOsmosisSwap::parse(matches))
+            })
+        }
+
+        fn def() -> App {
+            App::new(Self::CMD)
+                .about(wrap!("Make a swap of assets on Osmosis."))
+                .add_args::<args::TxOsmosisSwap<args::CliTypes>>()
         }
     }
 
@@ -3457,6 +3485,7 @@ pub mod args {
     pub const NUT: ArgFlag = flag("nut");
     pub const OUT_FILE_PATH_OPT: ArgOpt<PathBuf> = arg_opt("out-file-path");
     pub const OUTPUT: ArgOpt<PathBuf> = arg_opt("output");
+    pub const OUTPUT_DENOM: Arg<String> = arg("output-denom");
     pub const OUTPUT_FOLDER_PATH: ArgOpt<PathBuf> =
         arg_opt("output-folder-path");
     pub const OWNER: Arg<WalletAddress> = arg("owner");
@@ -3510,6 +3539,7 @@ pub mod args {
     pub const SHIELDED: ArgFlag = flag("shielded");
     pub const SHOW_IBC_TOKENS: ArgFlag = flag("show-ibc-tokens");
     pub const SIGNER: ArgOpt<WalletAddress> = arg_opt("signer");
+    pub const SLIPPAGE: Arg<u64> = arg("slippage-percent");
     pub const SIGNING_KEYS: ArgMulti<WalletPublicKey, GlobStar> =
         arg_multi("signing-keys");
     pub const SIGNATURES: ArgMulti<PathBuf, GlobStar> = arg_multi("signatures");
@@ -3566,6 +3596,7 @@ pub mod args {
     pub const WASM_CHECKSUMS_PATH: Arg<PathBuf> = arg("wasm-checksums-path");
     pub const WASM_DIR: ArgOpt<PathBuf> = arg_opt("wasm-dir");
     pub const WEBSITE_OPT: ArgOpt<String> = arg_opt("website");
+    pub const WINDOW_SECONDS: Arg<u64> = arg("window-seconds");
     pub const WITH_INDEXER: ArgOpt<String> = arg_opt("with-indexer");
     pub const TX_PATH: Arg<PathBuf> = arg("tx-path");
     pub const TX_PATH_OPT: ArgOpt<PathBuf> = TX_PATH.opt();
@@ -5006,6 +5037,78 @@ pub mod args {
                         ))
                         .conflicts_with(FEE_PAYER_OPT.name),
                 )
+        }
+    }
+
+    impl CliToSdk<TxOsmosisSwap<SdkTypes>> for TxOsmosisSwap<CliTypes> {
+        type Error = std::io::Error;
+
+        fn to_sdk(
+            self,
+            ctx: &mut Context,
+        ) -> Result<TxOsmosisSwap<SdkTypes>, Self::Error> {
+            let chain_ctx = ctx.borrow_mut_chain_or_exit();
+            let recipient = chain_ctx.get(&self.recipient);
+            Ok(TxOsmosisSwap {
+                transfer: self.transfer.to_sdk(ctx)?,
+                output_denom: self.output_denom,
+                recipient,
+                slippage_percent: self.slippage_percent,
+                window_seconds: self.window_seconds,
+            })
+        }
+    }
+
+    impl Args for TxOsmosisSwap<CliTypes> {
+        fn parse(matches: &ArgMatches) -> Self {
+            let transfer = TxIbcTransfer::parse(matches);
+            let output_denom = OUTPUT_DENOM.parse(matches);
+            let recipient = PAYMENT_ADDRESS_TARGET.parse(matches);
+            let slippage_percent = SLIPPAGE.parse(matches);
+            if slippage_percent > 100 {
+                panic!(
+                    "The slippage percent must be an integer between 0 and \
+                     100."
+                )
+            }
+            let window_seconds = WINDOW_SECONDS.parse(matches);
+            Self {
+                transfer,
+                output_denom,
+                recipient,
+                slippage_percent,
+                window_seconds,
+            }
+        }
+
+        fn def(app: App) -> App {
+            app.add_args::<TxIbcTransfer<CliTypes>>()
+                .arg(
+                    OUTPUT_DENOM.def().help(wrap!(
+                        "The IBC denomination of the desired token"
+                    )),
+                )
+                .arg(PAYMENT_ADDRESS_TARGET.def().help(wrap!(
+                    "The MASP address to receive the swapped tokens."
+                )))
+                .arg(SLIPPAGE.def().help(wrap!(
+                    "The slippage percent as an integer between 0 and 100."
+                )))
+                .arg(WINDOW_SECONDS.def().help(wrap!(
+                    "A mysterious thing that should be set to 10s"
+                )))
+                .mut_arg(RECEIVER.name, |arg| {
+                    arg.long("swap-contract").help(wrap!(
+                        "The address of the Osmosis contract performing the \
+                         swap. This will be the receiver of the IBC transfer"
+                    ))
+                })
+                .mut_arg(IBC_MEMO.name, |arg| {
+                    arg.help(wrap!(
+                        "The masp transaction generated via `ibc-gen-shielding`. This will be the memo \
+                        field of the returning IBC packet."
+                    ))
+                })
         }
     }
 

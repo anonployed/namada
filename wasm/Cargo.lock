@@ -4060,6 +4060,7 @@ dependencies = [
 name = "namada_tests"
 version = "0.43.0"
 dependencies = [
+ "base64 0.21.7",
  "concat-idents",
  "derivative",
  "hyper 0.14.27",
