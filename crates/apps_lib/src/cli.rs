@@ -5063,7 +5063,7 @@ pub mod args {
         fn parse(matches: &ArgMatches) -> Self {
             let transfer = TxIbcTransfer::parse(matches);
             let output_denom = OUTPUT_DENOM.parse(matches);
-            let recipient = PAYMENT_ADDRESS_TARGET.parse(matches);
+            let recipient = TARGET.parse(matches);
             let slippage_percent = SLIPPAGE.parse(matches);
             if slippage_percent > 100 {
                 panic!(
@@ -5088,8 +5088,8 @@ pub mod args {
                         "The IBC denomination of the desired token"
                     )),
                 )
-                .arg(PAYMENT_ADDRESS_TARGET.def().help(wrap!(
-                    "The MASP address to receive the swapped tokens."
+                .arg(TARGET.def().help(wrap!(
+                    "The transparent address to receive the swapped tokens."
                 )))
                 .arg(SLIPPAGE.def().help(wrap!(
                     "The slippage percent as an integer between 0 and 100."
@@ -5103,12 +5103,7 @@ pub mod args {
                          swap. This will be the receiver of the IBC transfer"
                     ))
                 })
-                .mut_arg(IBC_MEMO.name, |arg| {
-                    arg.help(wrap!(
-                        "The masp transaction generated via `ibc-gen-shielding`. This will be the memo \
-                        field of the returning IBC packet."
-                    ))
-                })
+
         }
     }
 

@@ -478,8 +478,8 @@ pub struct TxOsmosisSwap<C: NamadaTypes = SdkTypes> {
     pub transfer: TxIbcTransfer<C>,
     /// The token we wish to receive
     pub output_denom: String,
-    /// Recipient payment address
-    pub recipient: C::PaymentAddress,
+    /// Recipient address
+    pub recipient: C::Address,
     /// Slippage percent
     pub slippage_percent: u64,
     /// TODO! Figure out what this is
@@ -536,9 +536,7 @@ impl TxOsmosisSwap<SdkTypes> {
             slippage_percent,
             window_seconds,
         } = self;
-        let next_memo = transfer.ibc_memo
-            .take()
-            .expect("No masp transaction provided as a memo.");
+        let next_memo = transfer.ibc_memo.take();
         let memo = Memo {
             wasm: Wasm {
                 contract: transfer.receiver.clone(),
@@ -550,14 +548,13 @@ impl TxOsmosisSwap<SdkTypes> {
                             window_seconds,
                         },
                     },
-                    next_memo: Some(next_memo),
+                    next_memo,
                     receiver: recipient.to_string(),
                     on_failed_delivery: "do_nothing".to_string(),
                 },
             },
         };
         transfer.ibc_memo = Some(serde_json::to_string(&memo).unwrap());
-        dbg!(&transfer.ibc_memo);
         transfer
     }
 }
