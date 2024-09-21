@@ -635,7 +635,10 @@ where
                             eth_cold_key: &eth_cold_key.pk.raw,
                             eth_hot_key: &eth_hot_key.pk.raw,
                             current_epoch,
-                            commission_rate: *commission_rate,
+                            commission_rate: std::cmp::max(
+                                *commission_rate,
+                                params.min_commission_rate,
+                            ),
                             max_commission_rate_change:
                                 *max_commission_rate_change,
                             metadata: metadata.clone(),
