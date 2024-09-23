@@ -29,9 +29,11 @@ use namada_core::chain::ChainId;
 use namada_core::token::NATIVE_MAX_DECIMAL_PLACES;
 use namada_sdk::address::Address;
 use namada_sdk::chain::Epoch;
+use namada_sdk::dec::Dec;
 use namada_sdk::time::DateTimeUtc;
 use namada_sdk::token;
 use namada_test_utils::TestWasms;
+use regex::Regex;
 use serde::Serialize;
 use serde_json::json;
 use setup::constants::*;
@@ -503,10 +505,13 @@ fn stop_ledger_at_height() -> Result<()> {
 fn pos_bonds() -> Result<()> {
     let pipeline_len = 2;
     let unbonding_len = 4;
+    let min_commission_rate = Dec::from_str("0.1").unwrap();
     let test = setup::network(
         |mut genesis, base_dir: &_| {
             genesis.parameters.pos_params.pipeline_len = pipeline_len;
             genesis.parameters.pos_params.unbonding_len = unbonding_len;
+            genesis.parameters.pos_params.min_commission_rate =
+                min_commission_rate;
             genesis.parameters.parameters.min_num_of_blocks = 6;
             genesis.parameters.parameters.epochs_per_year = 31_536_000;
             let mut genesis = setup::set_validators(
@@ -576,7 +581,51 @@ fn pos_bonds() -> Result<()> {
     let rpc = get_actor_rpc(&test, Who::Validator(0));
     wait_for_block_height(&test, &rpc, 2, 30)?;
 
+    // 1.1 Query the validator commission rate (should be the min parameter)
     let validator_0_rpc = get_actor_rpc(&test, Who::Validator(0));
+    let tx_args = vec![
+        "commission-rate",
+        "--validator",
+        "validator-0-validator",
+        "--node",
+        &validator_0_rpc,
+    ];
+    let mut client =
+        run_as!(test, Who::Validator(0), Bin::Client, tx_args, Some(40))?;
+
+    let str1 = client.exp_regex(r".* commission rate: [0-1]\.[0-9]*,.*")?.1;
+    client.assert_success();
+
+    let rate1 = Regex::new(r"commission rate: ([0-1]\.[0-9]+),")?
+        .captures(&str1)
+        .unwrap()
+        .get(1)
+        .unwrap()
+        .as_str();
+    let rate1 = Dec::from_str(rate1).unwrap();
+    assert_eq!(rate1, min_commission_rate);
+
+    let tx_args = vec![
+        "commission-rate",
+        "--validator",
+        "validator-1-validator",
+        "--node",
+        &validator_0_rpc,
+    ];
+    let mut client =
+        run_as!(test, Who::Validator(1), Bin::Client, tx_args, Some(40))?;
+
+    let str2 = client.exp_regex(r".* commission rate: [0-1]\.[0-9]*,.*")?.1;
+    client.assert_success();
+
+    let rate2 = Regex::new(r"commission rate: ([0-1]\.[0-9]+),")?
+        .captures(&str2)
+        .unwrap()
+        .get(1)
+        .unwrap()
+        .as_str();
+    let rate2 = Dec::from_str(rate2).unwrap();
+    assert_eq!(rate1, rate2);
 
     // 2. Submit a self-bond for the first genesis validator
     let tx_args = vec![

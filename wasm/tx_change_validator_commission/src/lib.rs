@@ -114,7 +114,11 @@ mod tests {
 
         assert_eq!(commission_rates_pre[0], Some(initial_rate));
 
-        apply_tx(ctx(), signed_tx.batch_first_tx())?;
+        let res = apply_tx(ctx(), signed_tx.batch_first_tx());
+        if commission_change.new_rate < pos_params.min_commission_rate {
+            assert!(res.is_err());
+            return Ok(());
+        }
 
         // Read the data after the tx is executed
 

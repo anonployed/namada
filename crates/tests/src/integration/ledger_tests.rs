@@ -1670,6 +1670,131 @@ fn change_validator_metadata() -> Result<()> {
     let captured =
         CapturedOutput::of(|| run(&node, Bin::Client, metadata_query_args));
     assert_matches!(captured.result, Ok(_));
+    assert!(captured.contains("Email: theokayestvalidator@namada.net"));
+    assert!(captured.contains(
+        "Description: We are just an okay validator node trying to get by"
+    ));
+    assert!(captured.contains("No website"));
+    assert!(captured.contains("No discord handle"));
+    assert!(captured.contains("commission rate:"));
+    assert!(captured.contains("max change per epoch:"));
+
+    // 6. Try to change the validator commission below the minimum
+    let commission_change_args = apply_use_device(vec![
+        "change-commission-rate",
+        "--validator",
+        "validator-0-validator",
+        "--commission-rate",
+        "0.01",
+        "--node",
+        &validator_one_rpc,
+    ]);
+    let captured =
+        CapturedOutput::of(|| run(&node, Bin::Client, commission_change_args));
+    assert_matches!(captured.result, Err(_));
+
+    // 7. Query to ensure it hasn't changed
+    let commission_change_args = apply_use_device(vec![
+        "commission-rate",
+        "--validator",
+        "validator-0-validator",
+        "--node",
+        &validator_one_rpc,
+    ]);
+    let captured =
+        CapturedOutput::of(|| run(&node, Bin::Client, commission_change_args));
+    assert_matches!(captured.result, Ok(_));
+    assert!(
+        captured.contains("commission rate: 0.05, max change per epoch: 0.01")
+    );
+
+    Ok(())
+}
+
+/// Change validator metadata
+#[test]
+fn check_validator_commission() -> Result<()> {
+    // This address doesn't matter for tests. But an argument is required.
+    let validator_one_rpc = "http://127.0.0.1:26567";
+    // 1. start the ledger node
+    let (node, _services) = setup::setup()?;
+
+    // 2. Query the validator metadata loaded from genesis
+    let metadata_query_args = vec![
+        "validator-metadata",
+        "--validator",
+        "validator-0-validator",
+        "--node",
+        &validator_one_rpc,
+    ];
+    let captured = CapturedOutput::of(|| {
+        run(&node, Bin::Client, metadata_query_args.clone())
+    });
+    assert_matches!(captured.result, Ok(_));
+    assert!(captured.contains("No validator name"));
+    assert!(captured.contains("Email:"));
+    assert!(captured.contains("No description"));
+    assert!(captured.contains("No website"));
+    assert!(captured.contains("No discord handle"));
+    assert!(captured.contains("commission rate:"));
+    assert!(captured.contains("max change per epoch:"));
+
+    // 3. Add some metadata to the validator
+    let metadata_change_args = apply_use_device(vec![
+        "change-metadata",
+        "--validator",
+        "validator-0-validator",
+        "--name",
+        "theokayestvalidator",
+        "--email",
+        "theokayestvalidator@namada.net",
+        "--description",
+        "We are just an okay validator node trying to get by",
+        "--website",
+        "theokayestvalidator.com",
+        "--node",
+        &validator_one_rpc,
+    ]);
+
+    let captured =
+        CapturedOutput::of(|| run(&node, Bin::Client, metadata_change_args));
+    assert_matches!(captured.result, Ok(_));
+    assert!(captured.contains(TX_APPLIED_SUCCESS));
+
+    // 4. Query the metadata after the change
+    let captured = CapturedOutput::of(|| {
+        run(&node, Bin::Client, metadata_query_args.clone())
+    });
+    assert_matches!(captured.result, Ok(_));
+    assert!(captured.contains("Validator name: theokayestvalidator"));
+    assert!(captured.contains("Email: theokayestvalidator@namada.net"));
+    assert!(captured.contains(
+        "Description: We are just an okay validator node trying to get by"
+    ));
+    assert!(captured.contains("Website: theokayestvalidator.com"));
+    assert!(captured.contains("No discord handle"));
+    assert!(captured.contains("commission rate:"));
+    assert!(captured.contains("max change per epoch:"));
+
+    // 5. Remove the validator website
+    let metadata_change_args = apply_use_device(vec![
+        "change-metadata",
+        "--validator",
+        "validator-0-validator",
+        "--website",
+        "",
+        "--node",
+        &validator_one_rpc,
+    ]);
+    let captured =
+        CapturedOutput::of(|| run(&node, Bin::Client, metadata_change_args));
+    assert_matches!(captured.result, Ok(_));
+    assert!(captured.contains(TX_APPLIED_SUCCESS));
+
+    // 6. Query the metadata to see that the validator website is removed
+    let captured =
+        CapturedOutput::of(|| run(&node, Bin::Client, metadata_query_args));
+    assert_matches!(captured.result, Ok(_));
     assert!(captured.contains("Validator name: theokayestvalidator"));
     assert!(captured.contains("Email: theokayestvalidator@namada.net"));
     assert!(captured.contains(
