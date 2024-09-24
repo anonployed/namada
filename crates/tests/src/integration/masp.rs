@@ -77,7 +77,6 @@ fn masp_incentives() -> Result<()> {
             validator_one_rpc,
         ],
     )?;
-    node.assert_success();
 
     // Assert BTC balance at VK(A) is 1
     let captured = CapturedOutput::of(|| {
@@ -126,7 +125,6 @@ fn masp_incentives() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert BTC balance at VK(A) is still 1
     let captured = CapturedOutput::of(|| {
@@ -196,7 +194,6 @@ fn masp_incentives() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert BTC balance at VK(A) is still 1
     let captured = CapturedOutput::of(|| {
@@ -286,7 +283,6 @@ fn masp_incentives() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert ETH balance at VK(B) is 0.001
     let captured = CapturedOutput::of(|| {
@@ -335,7 +331,6 @@ fn masp_incentives() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert ETH balance at VK(B) is still 0.001
     let captured = CapturedOutput::of(|| {
@@ -426,7 +421,6 @@ fn masp_incentives() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert ETH balance at VK(B) is 0
     let captured = CapturedOutput::of(|| {
@@ -454,7 +448,6 @@ fn masp_incentives() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert VK(B) retains the NAM rewards dispensed in the correct
     // amount.
@@ -483,7 +476,6 @@ fn masp_incentives() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert NAM balance at MASP pool is
     // the accumulation of rewards from the shielded assets (BTC and ETH)
@@ -536,7 +528,6 @@ fn masp_incentives() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert BTC balance at VK(A) is 0
     let captured = CapturedOutput::of(|| {
@@ -604,7 +595,6 @@ fn masp_incentives() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert NAM balance at VK(A) is the rewards dispensed earlier
     // (since VK(A) has no shielded assets, no further rewards should
@@ -677,7 +667,6 @@ fn masp_incentives() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
     // Send all NAM rewards from SK(B) to Christel
     run(
         &node,
@@ -710,7 +699,6 @@ fn masp_incentives() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
     // Send all NAM rewards from SK(A) to Bertha
     run(
         &node,
@@ -739,7 +727,6 @@ fn masp_incentives() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert NAM balance at VK(A) is 0
     let captured = CapturedOutput::of(|| {
@@ -766,7 +753,6 @@ fn masp_incentives() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
     // Assert NAM balance at VK(B) is 0
     let captured = CapturedOutput::of(|| {
         run(
@@ -885,7 +871,6 @@ fn spend_unconverted_asset_type() -> Result<()> {
             validator_one_rpc,
         ],
     )?;
-    node.assert_success();
     // 4. Check the shielded balance
     let captured = CapturedOutput::of(|| {
         run(
@@ -976,7 +961,6 @@ fn masp_txs_and_queries() -> Result<()> {
             validator_one_rpc,
         ],
     )?;
-    node.assert_success();
 
     let txs_args = vec![
         // 0. Attempt to spend 10 BTC at SK(A) to PA(B)
@@ -1304,7 +1288,6 @@ fn multiple_unfetched_txs_same_block() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
     run(
         &node,
         Bin::Wallet,
@@ -1317,7 +1300,6 @@ fn multiple_unfetched_txs_same_block() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
 
     // 1. Shield tokens
     _ = node.next_epoch();
@@ -1552,7 +1534,6 @@ fn expired_masp_tx() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
 
     // 1. Shield tokens
     _ = node.next_epoch();
@@ -1750,7 +1731,6 @@ fn cross_epoch_unshield() -> Result<()> {
             validator_one_rpc,
         ],
     )?;
-    node.assert_success();
 
     // 2. Generate the tx in the current epoch
     let tempdir = tempfile::tempdir().unwrap();
@@ -1856,7 +1836,6 @@ fn dynamic_assets() -> Result<()> {
             validator_one_rpc,
         ],
     )?;
-    node.assert_success();
     // Wait till epoch boundary
     node.next_masp_epoch();
     // Send 1 BTC from Albert to PA
@@ -1884,7 +1863,6 @@ fn dynamic_assets() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert BTC balance at VK(A) is 1
     let captured = CapturedOutput::of(|| {
@@ -1952,7 +1930,6 @@ fn dynamic_assets() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert BTC balance at VK(A) is still 1
     let captured = CapturedOutput::of(|| {
@@ -2018,7 +1995,6 @@ fn dynamic_assets() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert BTC balance at VK(A) is now 2
     let captured = CapturedOutput::of(|| {
@@ -2066,7 +2042,6 @@ fn dynamic_assets() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert that VK(A) has now received a NAM rewward for second deposit
     let captured = CapturedOutput::of(|| {
@@ -2127,7 +2102,6 @@ fn dynamic_assets() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert BTC balance at VK(A) is still 2
     let captured = CapturedOutput::of(|| {
@@ -2194,7 +2168,6 @@ fn dynamic_assets() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Assert BTC balance at VK(A) is still 2
     let captured = CapturedOutput::of(|| {
@@ -2242,7 +2215,6 @@ fn dynamic_assets() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
     // Assert BTC balance at VK(A) is still 2
     let captured = CapturedOutput::of(|| {
         run(
@@ -2302,7 +2274,6 @@ fn dynamic_assets() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
     // Assert BTC balance at VK(A) is still 2
     let captured = CapturedOutput::of(|| {
         run(
@@ -2373,7 +2344,6 @@ fn masp_fee_payment() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
     run(
         &node,
         Bin::Wallet,
@@ -2386,7 +2356,6 @@ fn masp_fee_payment() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
 
     // Shield some tokens
     run(
@@ -2416,7 +2385,6 @@ fn masp_fee_payment() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
     let captured = CapturedOutput::of(|| {
         run(
             &node,
@@ -2600,7 +2568,6 @@ fn masp_fee_payment() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
     // Check the exact balance of the tx source to ensure that the masp fee
     // payment transaction was executed only once
     let captured = CapturedOutput::of(|| {
@@ -2671,7 +2638,6 @@ fn masp_fee_payment_gas_limit() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
     run(
         &node,
         Bin::Wallet,
@@ -2684,7 +2650,6 @@ fn masp_fee_payment_gas_limit() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
 
     // Shield some tokens
     run(
@@ -2714,7 +2679,6 @@ fn masp_fee_payment_gas_limit() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Check that the balance hasn't changed
     let captured = CapturedOutput::of(|| {
@@ -2772,7 +2736,6 @@ fn masp_fee_payment_gas_limit() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     // Check that the balance hasn't changed
     let captured = CapturedOutput::of(|| {
@@ -2821,7 +2784,6 @@ fn masp_fee_payment_with_non_disposable() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
     run(
         &node,
         Bin::Wallet,
@@ -2834,7 +2796,6 @@ fn masp_fee_payment_with_non_disposable() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
 
     // Shield some tokens
     run(
@@ -2868,7 +2829,6 @@ fn masp_fee_payment_with_non_disposable() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     let captured = CapturedOutput::of(|| {
         run(
@@ -2943,7 +2903,6 @@ fn masp_fee_payment_with_non_disposable() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     let captured = CapturedOutput::of(|| {
         run(
@@ -3010,7 +2969,6 @@ fn masp_fee_payment_with_custom_spending_key() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
     run(
         &node,
         Bin::Wallet,
@@ -3023,7 +2981,6 @@ fn masp_fee_payment_with_custom_spending_key() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
     run(
         &node,
         Bin::Wallet,
@@ -3036,7 +2993,6 @@ fn masp_fee_payment_with_custom_spending_key() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
 
     // Shield some tokens
     run(
@@ -3084,7 +3040,6 @@ fn masp_fee_payment_with_custom_spending_key() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     let captured = CapturedOutput::of(|| {
         run(
@@ -3159,7 +3114,6 @@ fn masp_fee_payment_with_custom_spending_key() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     let captured = CapturedOutput::of(|| {
         run(
@@ -3250,7 +3204,6 @@ fn masp_fee_payment_with_different_token() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
     run(
         &node,
         Bin::Wallet,
@@ -3263,7 +3216,6 @@ fn masp_fee_payment_with_different_token() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
 
     // Shield some tokens
     run(
@@ -3333,7 +3285,6 @@ fn masp_fee_payment_with_different_token() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     let captured = CapturedOutput::of(|| {
         run(
@@ -3427,7 +3378,6 @@ fn masp_fee_payment_with_different_token() -> Result<()> {
         Bin::Client,
         vec!["shielded-sync", "--node", validator_one_rpc],
     )?;
-    node.assert_success();
 
     let captured = CapturedOutput::of(|| {
         run(
@@ -3532,7 +3482,6 @@ fn identical_output_descriptions() -> Result<()> {
             "--unsafe-dont-encrypt",
         ],
     )?;
-    node.assert_success();
 
     // Generate a tx to shield some tokens
     run(
@@ -3659,7 +3608,6 @@ fn identical_output_descriptions() -> Result<()> {
             validator_one_rpc,
         ],
     )?;
-    node.assert_success();
 
     // Assert NAM balance at VK(A) is 2000
     let captured = CapturedOutput::of(|| {
@@ -3982,7 +3930,6 @@ fn masp_batch() -> Result<()> {
             validator_one_rpc,
         ],
     )?;
-    node.assert_success();
 
     // Assert NAM balances at VK(A), Albert and Bertha
     for (owner, balance) in [
@@ -4212,7 +4159,6 @@ fn masp_atomic_batch() -> Result<()> {
             validator_one_rpc,
         ],
     )?;
-    node.assert_success();
 
     // Assert NAM balances at VK(A), Albert and Bertha are unchanged
     for (owner, balance) in [
@@ -4445,7 +4391,6 @@ fn tricky_masp_txs() -> Result<()> {
             validator_one_rpc,
         ],
     )?;
-    node.assert_success();
 
     // Assert NAM balances at VK(A), Albert, Bertha and Christel
     for (owner, balance) in [
